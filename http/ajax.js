@@ -1,5 +1,5 @@
 let ajax = opations => {
-    var defaults = {
+    let defaults = {
         url: '',
         data: '',
         methods: 'get',
@@ -7,14 +7,14 @@ let ajax = opations => {
         error: null
     }
 
-    $.extend(defaults, opations);
+    Object.assign(defaults, opations);
 
     if (!defaults.url.trim()) {
         alert('请输入地址')
         return
     }
 
-    var xhr = new XMLHttpRequest()
+    let xhr = new XMLHttpRequest()
 
     if (defaults.methods === 'get') {
         defaults.url = defaults.url + '?' + defaults.data
