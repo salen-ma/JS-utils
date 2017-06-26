@@ -13,6 +13,7 @@ let cookie = (...rest) => {
     // set cookie
     } else if (rest.length >= 2) {
         let [key, val, time] = rest
+        time = time*1
         let re = /\d/g
         if (re.test(time)) {
             let now = new Date()
