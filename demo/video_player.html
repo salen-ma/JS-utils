@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		body{
+			margin:0;
+		}
+		#player{
+			position: absolute;
+			left: 50%;
+			top:50%;
+			transform: translateX(-50%) translateY(-50%);
+		}
+		#cl{
+			position: relative;
+		}
+		#controls{
+			display: flex;
+			flex-direction: column;
+			flex-wrap: wrap;
+			position: absolute;
+			left: 0;
+			bottom: 0;
+			z-index: 10;
+			height: 52px;
+			background-color: rgba(0, 0, 0, .6)
+		}
+		#controls .progess{
+			width: 100%;
+			height: 4px;
+			transition: height 500ms;
+			background-color: #fff;
+			cursor: pointer;
+		}		
+		#controls .progess .progessed{
+			position: relative;
+			width: 0%;
+			height: 100%;	
+			background-color: #14a2f4;	
+			cursor: pointer;	
+		}
+		#controls .progess.active{
+			height: 6px;
+		}
+		#controls .progess.active .dragItem{
+			position: absolute;
+			right: 0;
+			top: 50%;
+			transform: translateX(50%) translateY(-50%);
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			background-color: #fff;
+		}
+		#controls .controlItems{
+			display: flex;
+			justify-content: space-between;
+			width: 100%;
+			flex: 1;
+			color: #fff;
+		}
+		.controlItems .left,.controlItems .right{
+			display: flex;
+			-ms-align-items: center;
+			align-items: center;
+		}
+		.controlItems .right{
+			
+		}	
+		.controlItems .left .onOff{
+			display: inline-block;
+			border: 10px solid rgba(0, 0, 0, 0);
+			border-left: 12px solid #fff;
+			cursor: pointer;
+			margin-left: 20px;
+			margin-right: 20px;			
+		} 	
+		.controlItems .left .onOff.active{
+			position: relative;
+			border-width: 0px;
+			width: 3px;
+			height: 12px;
+			background-color: #fff;
+		}
+		.controlItems .left .onOff.active:after{
+			content: "";
+			position: absolute;
+			left: 7px;
+			display: inline-block;
+			width: 3px;
+			height: 12px;
+			background-color: #fff;
+		}
+	</style>
+</head>
+<body>
+	<div id="player">
+		<video id="video" src="" style="display: none"></video>
+		<canvas id="cl"></canvas>
+		<div id="controls">
+			<div class="progess">
+				<div class="progessed">
+					<div class="dragItem"></div>
+				</div>
+			</div>
+			<div class="controlItems">
+				<div class="left">
+					<span class="onOff"></span>
+					<span class="currentTime">00:00</span>
+					/
+					<span class="fullTime">35:00</span>
+				</div>
+				<div class="right"></div>
+			</div>
+		</div>
+	</div>
+	<script>
+		/**
+		 * attar
+		 * controls 控件
+		 * autoplay 自动播放
+		 * currentTime 播放时间s
+		 * volume 音量
+		 * duration 总时间 只读 获取需要时间
+		 * preload 用何种加载方式 none不加载 metadata获取长度 auto加载
+		 * loop 循环播放
+		 * muted 是否静音
+		 *
+		 * paused 是否暂停 只读
+		 * ended 是否播放完 只读
+		 * error 错误代码 只读
+		 * currentSrc 地址字符串 只读 获取需要时间
+		 */	
+		
+		/**
+		 * function
+		 * play() 播放
+		 * pause() 暂停
+		 * load() 重新加载
+		 */
+		
+		/**
+		 * event
+		 * canplay 可以播放触发
+		 * ended 结束时触发
+		 */
+		
+		/** 
+		 * video额外属性
+		 * poster 预览图片
+		 * width height
+		 * videoWidth videoHeight 只读 需要时间获取
+		 */
+		
+		window.onload = function(){
+
+			let player = document.getElementById('player')
+			let video = document.getElementById('video')
+			let oC = document.getElementById('cl')
+			let oGC = oC.getContext('2d')
+			let controls = document.getElementById("controls")
+
+			let progess = document.getElementsByClassName('progess')[0]
+			let progessed = document.getElementsByClassName('progessed')[0]
+			let onOff = document.getElementsByClassName('onOff')[0]
+			let currentTime = document.getElementsByClassName('currentTime')[0]
+			let fullTime = document.getElementsByClassName('fullTime')[0]
+			let dragItem = document.getElementsByClassName('dragItem')[0]
+
+			oC.width = video.videoWidth
+			oC.height = video.videoHeight
+
+			player.style.width = video.videoWidth + 'px'
+			player.style.height = video.videoHeight + 'px'
+			controls.style.width = video.videoWidth + 'px'
+
+			oGC.drawImage(video, 0, 0)
+			let timer1 = null
+
+			/*func*/
+			let add0 = num => {
+				if(num < 10){
+					num = '0' + num
+				}else{
+					num = '' + num
+				}
+				return num
+			}
+
+			let formTime = time => {
+				let h = Math.floor( time/3600 )
+				let m = Math.floor((time - (h*3600))/60)
+				let s = Math.floor(time%60)
+				return h > 0 ? add0(h) + ':' + add0(m) + ':' + add0(s) : add0(m) + ':' + add0(s)
+			}
+
+			let play = () => {
+				timer1 = setInterval( () => {
+					oGC.drawImage(video, 0, 0)
+					currentTime.innerHTML = formTime( video.currentTime )
+					progessed.style.width = (video.currentTime / video.duration)*100 + '%'
+				},14)				
+			}
+
+			fullTime.innerHTML = formTime( video.duration )
+			currentTime.innerHTML = formTime( video.currentTime )
+
+			/*event*/
+			progess.onmouseover = function(){
+				progess.classList.add('active')
+			}
+			progess.onmouseout = function(){
+				progess.classList.remove('active')
+			}			
+
+			onOff.onclick = function(){
+				onOff.classList.toggle('active')
+				if( video.paused ){
+					video.play()
+					play()					
+				}else{
+					video.pause()
+					clearInterval(timer1)
+				}				
+			}
+
+			progess.onclick = function(e){
+				let rec = this.getBoundingClientRect()
+				video.currentTime = video.duration * ( (e.pageX - rec.left) / this.offsetWidth )
+				play()
+			}
+
+			dragItem.addEventListener('mousedown',function(){
+				console.log(this.offsetLeft + this.offsetWidth)
+
+				dragItem.addEventListener('mousemove',function(){
+
+				})
+			})
+
+			video.addEventListener('ended',() => {
+				onOff.classList.remove('active')
+			})
+		}
+	</script>
+</body>
+</html>
