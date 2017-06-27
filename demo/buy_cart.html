@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <ul id="list">
+		<li>鼠标</li>
+		<li>键盘</li>
+		<li>耳机</li>
+		<li>电脑</li>
+	</ul>
+	<hr/>
+	<ul id="cart"></ul>
+
+	<script>
+		var store = {
+			fetch(key){
+				return JSON.parse( localStorage.getItem(key) ) || [];
+			},
+			save(key,val){
+				localStorage.setItem(key,JSON.stringify(val) );
+			}
+		};
+
+		//渲染购物车列表
+		var render = (data)=>{
+			$('#cart').html(
+				data.map(function(item){
+					return '<li>'+item+'<span>×</span></li>'
+				}).join('')
+			)
+		};
+
+		//获取localStorage数据,并渲染
+		var localList = store.fetch('list');
+		render(localList);
+
+		//点击添加购物车
+		$('#list').on('click','li',function(){
+			if( !localList.includes( $(this).html() ) ){
+				$('#cart').append(  $(`<li>${$(this).html()}<span>×</span></li>`) );
+				localList.push( $(this).html() );
+			}
+
+			store.save( 'list',localList );
+		});
+
+		//从购物车删除
+		$('#cart').on('click','span',function(){
+			$(this).parent().remove();
+			var text = $(this).parent().text();
+			text = text.slice( 0,text.length - 1 );
+
+			localList.splice( localList.indexOf(text),1 );
+			store.save( 'list',localList );
+		});		
+
+		//同步页面
+		//触发共享localstorage页面的事件，不在当前页面触发
+		window.addEventListener('storage',function(ev){
+			if(ev.key === "list"){
+				var data = JSON.parse(ev.newValue);
+				render(data)
+				localList = data;
+			}			
+		});
+	</script>
+</body>
+</html>
