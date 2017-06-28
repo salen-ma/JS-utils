@@ -3,6 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Document</title>
+	<link rel="stylesheet" href="./css/font-awesome.min.css">
 	<style>
 		body{
 			margin:0;
@@ -34,17 +35,23 @@
 			background-color: #fff;
 			cursor: pointer;
 		}		
-		#controls .progess .progessed{
+		#controls .progess .progessed,.volume-progessed{
 			position: relative;
 			width: 0%;
 			height: 100%;	
 			background-color: #14a2f4;	
 			cursor: pointer;	
 		}
-		#controls .progess.active{
+		#controls .progess:hover{
 			height: 6px;
 		}
-		#controls .progess.active .dragItem{
+		#controls .progess:hover .dragItem{
+			display: block;
+		}	
+		.dragItem{
+			display: none;
+		}	
+		.dragItem,.volume-dragItem{
 			position: absolute;
 			right: 0;
 			top: 50%;
@@ -65,32 +72,29 @@
 			display: flex;
 			-ms-align-items: center;
 			align-items: center;
-		}
-		.controlItems .right{
-			
+			justify-content: space-around;
+			width: 200px;
 		}	
-		.controlItems .left .onOff{
-			display: inline-block;
-			border: 10px solid rgba(0, 0, 0, 0);
-			border-left: 12px solid #fff;
+		.controlItems .left i,.controlItems .right i{
 			cursor: pointer;
-			margin-left: 20px;
-			margin-right: 20px;			
-		} 	
-		.controlItems .left .onOff.active{
-			position: relative;
-			border-width: 0px;
-			width: 3px;
-			height: 12px;
-			background-color: #fff;
+			font-size: 20px;
 		}
-		.controlItems .left .onOff.active:after{
-			content: "";
-			position: absolute;
-			left: 7px;
-			display: inline-block;
-			width: 3px;
-			height: 12px;
+		.controlItems .left .icon-pause{
+			font-size: 18px;
+		}
+		.controlItems i:hover{
+			color: #14a2f4;
+		}
+		.volume-control{
+			display: flex;
+			justify-content: space-between;
+			-ms-align-items: center;
+			align-items: center;
+			width: 110px;
+		}
+		.volume-progess{
+			width: 80px;
+			height: 4px;
 			background-color: #fff;
 		}
 	</style>
@@ -107,12 +111,24 @@
 			</div>
 			<div class="controlItems">
 				<div class="left">
-					<span class="onOff"></span>
-					<span class="currentTime">00:00</span>
-					/
-					<span class="fullTime">35:00</span>
+					<i class="icon-play onOff"></i>
+					<div class="time">
+						<span class="currentTime">00:00</span>
+						/
+						<span class="fullTime">35:00</span>
+					</div>
 				</div>
-				<div class="right"></div>
+				<div class="right">
+					<div class="volume-control">
+						<i class="icon-volume-up icon-volume-off volume"></i>
+						<div class="volume-progess">
+							<div class="volume-progessed">
+								<div class="volume-dragItem"></div>
+							</div>							
+						</div>
+					</div>
+					<i class="icon-fullscreen fullscreen"></i>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -155,94 +171,150 @@
 		 */
 		
 		window.onload = function(){
+			(function(){
+				/*get element*/
+				let player = document.getElementById('player')
+				let video = document.getElementById('video')
+				let oC = document.getElementById('cl')
+				let oGC = oC.getContext('2d')
+				let controls = document.getElementById("controls")
 
-			let player = document.getElementById('player')
-			let video = document.getElementById('video')
-			let oC = document.getElementById('cl')
-			let oGC = oC.getContext('2d')
-			let controls = document.getElementById("controls")
+				let progess = document.getElementsByClassName('progess')[0]
+				let progessed = document.getElementsByClassName('progessed')[0]
+				let dragItem = document.getElementsByClassName('dragItem')[0]
+				let onOff = document.getElementsByClassName('onOff')[0]
+				let currentTime = document.getElementsByClassName('currentTime')[0]
+				let fullTime = document.getElementsByClassName('fullTime')[0]
+				let volume = document.getElementsByClassName('volume')[0]
+				let fullscreen = document.getElementsByClassName('fullscreen')[0]
+				let volumeProgess = document.getElementsByClassName('volume-progess')[0]
+				let volumeProgessed = document.getElementsByClassName('volume-progessed')[0]
+				let volumeDragItem = document.getElementsByClassName('volume-dragItem')[0]			
 
-			let progess = document.getElementsByClassName('progess')[0]
-			let progessed = document.getElementsByClassName('progessed')[0]
-			let onOff = document.getElementsByClassName('onOff')[0]
-			let currentTime = document.getElementsByClassName('currentTime')[0]
-			let fullTime = document.getElementsByClassName('fullTime')[0]
-			let dragItem = document.getElementsByClassName('dragItem')[0]
+				/*init*/
+				// canvas draw video
+				oC.width = video.videoWidth
+				oC.height = video.videoHeight
+				oGC.drawImage(video, 0, 0)
 
-			oC.width = video.videoWidth
-			oC.height = video.videoHeight
-
-			player.style.width = video.videoWidth + 'px'
-			player.style.height = video.videoHeight + 'px'
-			controls.style.width = video.videoWidth + 'px'
-
-			oGC.drawImage(video, 0, 0)
-			let timer1 = null
-
-			/*func*/
-			let add0 = num => {
-				if(num < 10){
-					num = '0' + num
-				}else{
-					num = '' + num
+				player.style.width = video.videoWidth + 'px'
+				player.style.height = video.videoHeight + 'px'
+				controls.style.width = video.videoWidth + 'px'
+				volumeProgessed.style.width = video.volume*100 + '%'
+				
+				let timer = null
+								
+				/*func*/
+				let add0 = num => {
+					if(num < 10){
+						num = '0' + num
+					}else{
+						num = '' + num
+					}
+					return num
 				}
-				return num
-			}
 
-			let formTime = time => {
-				let h = Math.floor( time/3600 )
-				let m = Math.floor((time - (h*3600))/60)
-				let s = Math.floor(time%60)
-				return h > 0 ? add0(h) + ':' + add0(m) + ':' + add0(s) : add0(m) + ':' + add0(s)
-			}
+				let formTime = time => {
+					let h = Math.floor( time/3600 )
+					let m = Math.floor((time - (h*3600))/60)
+					let s = Math.floor(time%60)
+					return h > 0 ? add0(h) + ':' + add0(m) + ':' + add0(s) : add0(m) + ':' + add0(s)
+				}
 
-			let play = () => {
-				timer1 = setInterval( () => {
-					oGC.drawImage(video, 0, 0)
-					currentTime.innerHTML = formTime( video.currentTime )
-					progessed.style.width = (video.currentTime / video.duration)*100 + '%'
-				},14)				
-			}
+				let play = () => {
+					clearInterval(timer)
+					timer = setInterval( () => {
+						oGC.drawImage(video, 0, 0)
+						currentTime.innerHTML = formTime( video.currentTime )
+						progessed.style.width = (video.currentTime / video.duration)*100 + '%'
+						console.log(1)
+					},33)		
+				}
 
-			fullTime.innerHTML = formTime( video.duration )
-			currentTime.innerHTML = formTime( video.currentTime )
+				let goPlay = function(e){
+					let rec = progess.getBoundingClientRect()
+					video.currentTime = video.duration * ( (e.pageX - rec.left) / progess.offsetWidth )
+					play()			
+				}
 
-			/*event*/
-			progess.onmouseover = function(){
-				progess.classList.add('active')
-			}
-			progess.onmouseout = function(){
-				progess.classList.remove('active')
-			}			
+				let goVolume = function(e){
+					let rec = volumeProgess.getBoundingClientRect()
+					let ratio = (e.pageX - rec.left) / volumeProgess.offsetWidth
+					ratio = ratio >= 1 ? 1 : ratio
+					ratio = ratio <= 0 ? 0 : ratio
+					volumeProgessed.style.width = ratio*100 + '%'
+					video.volume = ratio		
+					if(!ratio){
+						volume.classList.remove('icon-volume-up')
+					}else{
+						volume.classList.add('icon-volume-up')
+					}		
+				}
 
-			onOff.onclick = function(){
-				onOff.classList.toggle('active')
-				if( video.paused ){
-					video.play()
-					play()					
-				}else{
-					video.pause()
-					clearInterval(timer1)
-				}				
-			}
+				fullTime.innerHTML = formTime(video.duration)
+				currentTime.innerHTML = formTime(video.currentTime)		
+						
+				/*event*/
+				onOff.onclick = function(){
+					onOff.classList.toggle('icon-pause')
+					if( video.paused ){
+						video.play()
+						play()					
+					}else{
+						video.pause()
+						clearInterval(timer)
+					}				
+				}
 
-			progess.onclick = function(e){
-				let rec = this.getBoundingClientRect()
-				video.currentTime = video.duration * ( (e.pageX - rec.left) / this.offsetWidth )
-				play()
-			}
+				volume.onclick = function(){
+					volume.classList.toggle('icon-volume-up')
+					video.muted = !video.muted
+					if(video.muted){
+						volumeProgessed.style.width = '0px'
+					}else{
+						volumeProgessed.style.width = video.volume*100 + '%'
+					}				
+				}
 
-			dragItem.addEventListener('mousedown',function(){
-				console.log(this.offsetLeft + this.offsetWidth)
+				progess.onclick = function(e){
+					goPlay(e)
+					setTimeout( () => {
+						if(video.paused){
+							clearInterval(timer)
+						}					
+					},50)						
+				}
 
-				dragItem.addEventListener('mousemove',function(){
+				volumeProgess.onclick = function(e){
+					goVolume(e)
+				}
 
+				fullscreen.onclick = function(){
+					video.webkitRequestFullscreen()
+				}
+
+				dragItem.addEventListener('mousedown',function(e){
+					e.preventDefault()
+					document.addEventListener('mousemove',goPlay)
+					document.addEventListener('mouseup',function(){
+						document.removeEventListener('mousemove',goPlay)
+						if(video.paused){
+							clearInterval(timer)
+						}
+					})
 				})
-			})
 
-			video.addEventListener('ended',() => {
-				onOff.classList.remove('active')
-			})
+				volumeDragItem.addEventListener('mousedown',function(){
+					document.addEventListener('mousemove',goVolume)
+					document.addEventListener('mouseup',function(){
+						document.removeEventListener('mousemove',goVolume)
+					})
+				})			
+
+				video.addEventListener('ended',() => {
+					onOff.classList.remove('active')
+				})
+			})(window)
 		}
 	</script>
 </body>

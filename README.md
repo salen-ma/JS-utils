@@ -28,3 +28,6 @@
 ## Array
 - flatten(arr) 将多维数组降为一维
 - sortByAttr(attrName) 依据属性值排序对象
+
+## func
+- new Drag(ele) 拖拽元素
