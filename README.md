@@ -31,3 +31,8 @@
 
 ## func
 - new Drag(ele) 拖拽元素
+- let event =  new Event 事件方法，订阅发布事件
+    event.subscript(_status,handle) 订阅 _status事件名 handle事件函数
+    event.publish(_status) 触发事件
+    event.unsubscript(_status,handle) 取消事件
+- wheelEvent(obj,fnUp,fnDown) 滚轮事件，obj触发滚轮事件的元素，fnUp向上滚动触发的函数，fnDown向下滚动触发的函数
