@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		body{
+			margin: 0;
+		}
+		ul,li{
+			margin: 0;
+			padding: 0;
+			list-style: none;
+		}
+		#wrap{
+			display: flex;
+			justify-content: space-around;
+			width: 400px;
+			margin: 50px auto;
+		}
+		#page-wrap li{
+			float: left;
+			margin: 0 20px;
+			width: 30px;
+			height: 30px;
+			border-radius: 50%;
+			background-color: rgba(0, 0, 0, .5);
+			color: #fff;
+			text-align: center;
+			line-height: 30px;
+			cursor: pointer;
+		}
+		#page-wrap li.active{
+			background-color: blue;
+		}
+		span{
+			cursor: pointer;
+		}
+	</style>
+</head>
+<body>
+	<div id="wrap">
+		
+	</div>
+
+	<script>
+		let page = options => {
+			if(!options.id){
+				return false
+			}
+
+			let obj = document.getElementById(options.id)
+			let nowNum = options.nowNum || 1
+			let allNum = options.allNum || 5
+
+			if(allNum <= 5){
+				for(let i=1; i<=allNum; i++){
+					let oA = document.createElement('a')
+					oA.href = '#' + i
+					oA.innerHTML = nowNum*1 === i ? i : '[' + i + ']'
+					obj.appendChild(oA)
+				}
+			}else{
+				for(let i=1; i<=5; i++){
+					let oA = document.createElement('a')
+
+					if(nowNum*1 === 1 || nowNum*1 === 2){
+						oA.href = '#' +  i
+						oA.innerHTML = nowNum*1 === i ? i : '[' + i + ']'
+						obj.appendChild(oA)						
+					}
+					else if((allNum - nowNum === 1) || (allNum - nowNum === 0)){
+						oA.href = '#' + (nowNum - 5 + i)
+						oA.innerHTML = i === (5 - (allNum - nowNum)) ? nowNum - 5 + i : '[' + (nowNum - 5 + i) + ']'
+						obj.appendChild(oA)						
+					}else{
+						oA.href = '#' + (nowNum - 3 + i)
+						oA.innerHTML = i === 3 ? nowNum - 3 + i : '[' + (nowNum - 3 + i) + ']'
+						obj.appendChild(oA)
+					}
+				}				
+			}
+		}		
+
+		page({
+			id: 'wrap',
+			nowNum: 9,
+			allNum: 10
+		})
+	</script>
+</body>
+</html>
