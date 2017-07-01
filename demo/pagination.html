@@ -3,6 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Document</title>
+	<script src="../func/Pagination.js"></script>
 	<style>
 		body{
 			margin: 0;
@@ -44,7 +45,7 @@
 	</div>
 
 	<script>
-		let page = options => {
+		/*let page = options => {
 			if(!options.id){
 				return false
 			}
@@ -52,8 +53,23 @@
 			let obj = document.getElementById(options.id)
 			let nowNum = options.nowNum || 1
 			let allNum = options.allNum || 5
+			let visibleNum = options.visibleNum || 5
 
-			if(allNum <= 5){
+			let first = document.createElement('a')
+			first.className = 'first'
+			first.innerHTML = '首页'
+			first.href = '#1' 			
+			obj.appendChild(first)	
+
+			if(nowNum > 1){
+				let prev = document.createElement('a')
+				prev.className = 'prev'
+				prev.innerHTML = '上一页'
+				prev.href = '#' + (nowNum - 1)
+				obj.appendChild(prev)
+			}
+			
+			if(allNum <= visibleNum){
 				for(let i=1; i<=allNum; i++){
 					let oA = document.createElement('a')
 					oA.href = '#' + i
@@ -61,32 +77,67 @@
 					obj.appendChild(oA)
 				}
 			}else{
-				for(let i=1; i<=5; i++){
+				for(let i=1; i<=visibleNum; i++){
 					let oA = document.createElement('a')
 
-					if(nowNum*1 === 1 || nowNum*1 === 2){
+					if(nowNum <= Math.floor(visibleNum/2) ){
 						oA.href = '#' +  i
 						oA.innerHTML = nowNum*1 === i ? i : '[' + i + ']'
 						obj.appendChild(oA)						
 					}
-					else if((allNum - nowNum === 1) || (allNum - nowNum === 0)){
-						oA.href = '#' + (nowNum - 5 + i)
-						oA.innerHTML = i === (5 - (allNum - nowNum)) ? nowNum - 5 + i : '[' + (nowNum - 5 + i) + ']'
+					else if( (allNum - nowNum) <= Math.floor(visibleNum/2) ){
+						oA.href = '#' + (allNum - visibleNum + i)
+						oA.innerHTML = i === (visibleNum - (allNum - nowNum)) ? allNum - visibleNum + i : '[' + (allNum - visibleNum + i) + ']'
 						obj.appendChild(oA)						
 					}else{
-						oA.href = '#' + (nowNum - 3 + i)
-						oA.innerHTML = i === 3 ? nowNum - 3 + i : '[' + (nowNum - 3 + i) + ']'
+						oA.href = '#' + (nowNum - Math.ceil(visibleNum/2) + i)
+						oA.innerHTML = i === Math.ceil(visibleNum/2) ? nowNum - Math.ceil(visibleNum/2) + i : '[' + (nowNum - Math.ceil(visibleNum/2) + i) + ']'
 						obj.appendChild(oA)
 					}
 				}				
 			}
+
+			if(nowNum < allNum){
+				let next = document.createElement('a')
+				next.className = 'next'
+				next.innerHTML = '下一页'
+				next.href = '#' + (nowNum*1 + 1)
+				obj.appendChild(next)
+			}	
+
+			let last = document.createElement('a')
+			last.className = 'last'
+			last.innerHTML = '尾页'
+			last.href = '#' + allNum 			
+			obj.appendChild(last)		
+
+			window.onhashchange = function(){
+				nowNum = window.location.hash.slice(1)
+				obj.innerHTML = ''
+				page({
+					id: 'wrap',
+					nowNum,
+					allNum,
+					visibleNum
+				})				
+			}	
 		}		
 
 		page({
 			id: 'wrap',
-			nowNum: 9,
-			allNum: 10
-		})
+			nowNum: 6,
+			allNum: 10,
+			visibleNum: 7
+		})*/
+
+		new Page(
+			{
+				id: 'wrap',
+				nowNum: 6,
+				allNum: 10,
+				visibleNum: 7
+			}
+		)
 	</script>
 </body>
 </html>
