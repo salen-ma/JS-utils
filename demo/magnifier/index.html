@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>放大镜</title>
+	<style type="text/css">
+		.init{
+			position: absolute;
+			width: 400px;
+			height: 260px;
+			border: 1px solid #000;
+			cursor:move;
+		}
+		.init img{
+			width: 100%;
+			height: 100%;
+		}
+		.init span{
+			position: absolute;
+			width: 50px;
+			height: 30px;
+			bottom: -50px;
+			cursor: pointer;
+		}
+		.init span img{
+			width: 100%;
+			height: 100%;
+		}
+		.view{
+			position: absolute;
+			width: 70px;
+			height: 40px;
+			left: 0;
+			top: 0;
+			background-color: rgba(155, 230, 240, .5);
+			display: none;
+		}
+		.big{
+			position: absolute;
+			left: 450px;
+			width: 400px;
+			height: 260px;
+			display: none;
+			background: url(img/1.png) no-repeat;
+		}
+	</style>
+</head>
+<body>
+	<div class="init">
+		<img src="img/1.png">
+		<div class="view"></div>
+		<span></span>
+		<span></span>
+		<span></span>
+		<span></span>
+		<span></span>
+	</div>
+	<div class="big"></div>
+
+	<script type="text/javascript">
+		var init = document.querySelector('.init'),
+			view = document.querySelector('.view'),
+			big = document.querySelector('.big');
+		var spans = document.querySelectorAll('.init span');
+
+		var arr = ['1.png','2.png','3.png','4.png','5.png'];
+		for(var i=0; i<spans.length; i++){
+			spans[i].index = i;
+			spans[i].style.left = 15 + i*80 + 'px';
+			spans[i].innerHTML = `<img src="img/${arr[i]}">`;
+			spans[i].onmouseover = function(e){
+				e.cancelBubble = true;
+			}
+			spans[i].onmousemove = function(e){
+				e.cancelBubble = true;
+			}
+			spans[i].onclick = function(){
+				init.firstElementChild.src = `img/${arr[this.index]}`;
+				big.style.background = `url(img/${arr[this.index]}) no-repeat`;
+			}
+		}
+
+		init.addEventListener('mouseover',function(){
+			view.style.display = 'block';
+		});
+		
+		init.addEventListener('mouseout',function(){
+			view.style.display = '';
+			big.style.display = '';
+		});
+
+		init.addEventListener('mousemove',function(e){
+			var x = e.clientX - init.offsetLeft - view.offsetWidth/2;
+			var y = e.clientY - init.offsetTop - view.offsetHeight/2;
+			x = x <= 0 ? 0 : x;
+			x = x >= this.clientWidth - view.offsetWidth ? this.clientWidth - view.offsetWidth : x;
+			y = y <= 0 ? 0 : y;
+			y = y >= this.clientHeight - view.offsetHeight ? this.clientHeight - view.offsetHeight : y;
+			view.style.left = x + 'px';
+			view.style.top = y + 'px';
+			
+			var xBig = this.offsetWidth/view.offsetWidth;
+			var yBig = this.offsetHeight/view.offsetHeight;
+
+			big.style.display = 'block';
+			big.style.backgroundSize = `${xBig*100}% ${yBig*100}%`;
+			big.style.backgroundPositionX = -xBig*x + 'px';
+			big.style.backgroundPositionY = -yBig*y + 'px';
+		});
+	</script>
+</body>
+</html>
